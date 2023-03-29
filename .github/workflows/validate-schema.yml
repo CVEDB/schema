@@ -21,7 +21,8 @@ jobs:
           sudo npm install --loglevel verbose -g yargs ajv-formats@"^1.5.x" ajv-cli@"^4.0.x"
       - name: Install schema2markmap NPM dependencies
         run: |
-          sudo npm --prefix "./schema/support/schema2markmap" install "./schema/support/schema2markmap"
+          pwd > CVE_DIR
+          sudo npm --prefix "${CVE_DIR}/schema/support/schema2markmap" install "${CVE_DIR}/schema/support/schema2markmap"
       # Rename the schema, since AJV doesn't like non-".json" extensions
       - name: Prepare schema for bundling
         run: |
