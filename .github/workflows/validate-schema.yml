@@ -15,13 +15,13 @@ jobs:
   verify-json-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Install NPM dependencies (i.e., ajv)
         run: |
           sudo npm install --loglevel verbose -g yargs ajv-formats@"^1.5.x" ajv-cli@"^4.0.x"
       - name: Install schema2markmap NPM dependencies
         run: |
-          npm --prefix "${CVE_SCHEMA_DIR}/support/schema2markmap" install "${CVE_SCHEMA_DIR}/support/schema2markmap"
+          sudo npm --prefix "schema/support/schema2markmap" install "schema/support/schema2markmap"
       # Rename the schema, since AJV doesn't like non-".json" extensions
       - name: Prepare schema for bundling
         run: |
