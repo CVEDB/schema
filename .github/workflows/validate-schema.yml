@@ -1,0 +1,36 @@
+name: Validate JSON Schemas
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    branches:
+      - master
+env:
+  CVE_SCHEMA_DIR: schema/v5.0
+  CVE_SCHEMA_FILENAME: CVE_JSON_5.0_schema.json
+jobs:
+  verify-json-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install NPM dependencies (i.e., ajv)
+        run: |
+          sudo npm install --loglevel verbose -g yargs ajv-formats@"^1.5.x" ajv-cli@"^4.0.x"
+      - name: Install schema2markmap NPM dependencies
+        run: |
+          npm --prefix "${CVE_SCHEMA_DIR}/support/schema2markmap" install "${CVE_SCHEMA_DIR}/support/schema2markmap"
+      # Rename the schema, since AJV doesn't like non-".json" extensions
+      - name: Prepare schema for bundling
+        run: |
+          sed 's/file\://g' "${CVE_SCHEMA_DIR}/${CVE_SCHEMA_FILENAME}" > "${CVE_SCHEMA_DIR}/cve-schema.json"
+      - name: Bundle schema for AJV
+        run: |
+          node  "${CVE_SCHEMA_DIR}/support/schema2markmap/schema-bundle.js" "${CVE_SCHEMA_DIR}/cve-schema.json" > "${CVE_SCHEMA_DIR}/docs/CVE_JSON_5.0_bundled.json"
+      - name: Validate JSON schema
+        run: |
+          ajv compile -c ajv-formats -s "${CVE_SCHEMA_DIR}/docs/CVE_JSON_5.0_bundled.json"
+          ajv validate -c ajv-formats -s "${CVE_SCHEMA_DIR}/docs/CVE_JSON_5.0_bundled.json" -d "${CVE_SCHEMA_DIR}/docs/basic-example.json"
+          ajv validate -c ajv-formats -s "${CVE_SCHEMA_DIR}/docs/CVE_JSON_5.0_bundled.json" -d "${CVE_SCHEMA_DIR}/docs/advanced-example.json"
